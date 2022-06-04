@@ -117,7 +117,17 @@ public class PictureFrame {
       return new Dimension(202, 182);
     }
   }
-
+public void drawDominoesGuesses(Graphics g, int type) {
+  //dominoes = 1, Gusses = 2
+  if (type == 1) {
+  for (Domino d : dList) {
+  dp.drawDomino(g, d);
+ }
+ } else if (type == 2) {
+    for (domino d : gList) {
+      dp.drawDomino(g, d);
+    }
+  }
   public DominoPanel dp;
 
   public void PictureFrame(Aardvark sf) {
