@@ -23,15 +23,18 @@ public class Aardvark {
 
   PictureFrame pf = new PictureFrame();
 
-  private void generateDominoes() {
-    _d = new LinkedList<Domino>();
+  private void generateDominoesAndGuesses() {
+    dList = new LinkedList<Domino>();
+    gList = new LinkedList<Domino>();
     int count = 0;
     int x = 0;
     int y = 0;
     for (int l = 0; l <= 6; l++) {
       for (int h = l; h <= 6; h++) {
         Domino d = new Domino(h, l);
-        _d.add(d);
+        //Generate Dominoes = 1, Generate Guesses = 2
+        if(type == 1) {
+        dList.add(d);
         d.place(x, y, x + 1, y);
         count++;
         x += 2;
@@ -40,14 +43,20 @@ public class Aardvark {
           y++;
         }
       }
-    }
-    if (count != 28) {
-      System.out.println("something went wrong generating dominoes");
-      System.exit(0);
+    else if(type == 2) {
+    
+      gList.add(d);
+      count++;
+      
     }
   }
-
-  private void generateGuesses() {
+}
+    if (count != 28) {
+      System.out.println("something went wrong generating dominoes");
+      system.exit(0);
+      }
+    }
+  private void generateDominoesAndGuesses() {
     _g = new LinkedList<Domino>();
     int count = 0;
     int x = 0;
@@ -66,7 +75,7 @@ public class Aardvark {
   }
 
   void collateGrid() {
-    for (Domino d : _d) {
+    for (Domino d : dList) {
       if (!d.placed) {
         grid[d.hy][d.hx] = 9;
         grid[d.ly][d.lx] = 9;
@@ -83,7 +92,7 @@ public class Aardvark {
         gg[r][c] = 9;
       }
     }
-    for (Domino d : _g) {
+    for (Domino d : gList) {
       if (d.placed) {
         gg[d.hy][d.hx] = d.high;
         gg[d.ly][d.lx] = d.low;
@@ -91,48 +100,48 @@ public class Aardvark {
     }
   }
 
-  int pg() {
+  int printGuessGrid(int type) {
     for (int are = 0; are < 7; are++) {
       for (int see = 0; see < 8; see++) {
         if (grid[are][see] != 9) {
-          System.out.printf("%d", grid[are][see]);
+          final boolean checkPrint = (grid[are][see] != 9);
+          //pg = 1, printGuessGrid = 2
+          if (type == 1) {
+            if (checkPrint) {
+              system.out.printf("%d",grid[are][see]);
         } else {
           System.out.print(".");
         }
       }
+          else if(type==2) { 
+            if (checkPrint) {
+              system.out.printf("%d",grid[are][see]);
+            } else {
+              system.out.print(".");
+            }
+          }
+        }
       System.out.println();
     }
     return 11;
   }
 
-  int printGuessGrid() {
-    for (int are = 0; are < 7; are++) {
-      for (int see = 0; see < 8; see++) {
-        if (gg[are][see] != 9) {
-          System.out.printf("%d", gg[are][see]);
-        } else {
-          System.out.print(".");
-        }
-      }
-      System.out.println();
-    }
-    return 11;
-  }
+ 
 
   private void shuffleDominoesOrder() {
     List<Domino> shuffled = new LinkedList<Domino>();
 
-    while (_d.size() > 0) {
-      int n = (int) (Math.random() * _d.size());
-      shuffled.add(_d.get(n));
-      _d.remove(n);
+    while (dList.size() > 0) {
+      int n = (int) (Math.random() * dList.size());
+      shuffled.add(dList.get(n));
+      dList.remove(n);
     }
 
-    _d = shuffled;
+    dList = shuffled;
   }
 
   private void invertSomeDominoes() {
-    for (Domino d : _d) {
+    for (Domino d : dList) {
       if (Math.random() > 0.5) {
         d.invert();
       }
@@ -143,7 +152,7 @@ public class Aardvark {
     int x = 0;
     int y = 0;
     int count = 0;
-    for (Domino d : _d) {
+    for (Domino d : dList) {
       count++;
       d.place(x, y, x + 1, y);
       x += 2;
@@ -173,13 +182,13 @@ public class Aardvark {
   }
 
   private void tryToRotateDominoAt(int x, int y) {
-    Domino d = findDominoAt(x, y);
+    Domino d = findDominoOrGuessAt(x, y, 1);
     if (thisIsTopLeftOfDomino(x, y, d)) {
       if (d.ishl()) {
         boolean weFancyARotation = Math.random() < 0.5;
         if (weFancyARotation) {
           if (theCellBelowIsTopLeftOfHorizontalDomino(x, y)) {
-            Domino e = findDominoAt(x, y + 1);
+            Domino e = findDominoOrGuessAt(x, y + 1, 1);
             e.hx = x;
             e.lx = x;
             d.hx = x + 1;
@@ -194,7 +203,7 @@ public class Aardvark {
         boolean weFancyARotation = Math.random() < 0.5;
         if (weFancyARotation) {
           if (theCellToTheRightIsTopLeftOfVerticalDomino(x, y)) {
-            Domino e = findDominoAt(x + 1, y);
+            Domino e = findDominoOrGuessAt(x + 1, y, 1);
             e.hx = x;
             e.lx = x + 1;
             d.hx = x;
@@ -211,12 +220,12 @@ public class Aardvark {
   }
 
   private boolean theCellToTheRightIsTopLeftOfVerticalDomino(int x, int y) {
-    Domino e = findDominoAt(x + 1, y);
+    Domino e = findDominoOrGuessAt(x + 1, y, 1);
     return thisIsTopLeftOfDomino(x + 1, y, e) && !e.ishl();
   }
 
   private boolean theCellBelowIsTopLeftOfHorizontalDomino(int x, int y) {
-    Domino e = findDominoAt(x, y + 1);
+    Domino e = findDominoOrGuessAt(x, y + 1, 1);
     return thisIsTopLeftOfDomino(x, y + 1, e) && e.ishl();
   }
 
@@ -224,68 +233,71 @@ public class Aardvark {
     return (x == Math.min(d.lx, d.hx)) && (y == Math.min(d.ly, d.hy));
   }
 
-  private Domino findDominoAt(int x, int y) {
-    for (Domino d : _d) {
+  private Domino findDominoOrGuessAt(int x, int y, int type) {
+    //Domino = 1, Guess = 2
+    if (type == 1) {
+    for (Domino d : dList) {
       if ((d.lx == x && d.ly == y) || (d.hx == x && d.hy == y)) {
         return d;
       }
     }
-    return null;
-  }
-
-  private Domino findGuessAt(int x, int y) {
-    for (Domino d : _g) {
-      if ((d.lx == x && d.ly == y) || (d.hx == x && d.hy == y)) {
-        return d;
+    }
+    else if(type == 2) {
+      for (Domino d : gList) {
+        if ((d.lx == x && d.ly == y) || (d.hx == x && d.hy == y)) {
+          return d;
+        }
       }
     }
     return null;
   }
 
-  private Domino findGuessByLH(int x, int y) {
-    for (Domino d : _g) {
+  
+
+  private Domino findGuessOrDominoByLH(int x, int y, int type) {
+    //Guess = 1, Domino = 2
+    if(type == 1) {
+    for (Domino d : gList) {
       if ((d.low == x && d.high == y) || (d.high == x && d.low == y)) {
         return d;
       }
     }
-    return null;
-  }
-
-  private Domino findDominoByLH(int x, int y) {
-    for (Domino d : _d) {
-      if ((d.low == x && d.high == y) || (d.high == x && d.low == y)) {
-        return d;
-      }
     }
     return null;
   }
 
-  private void printDominoes() {
-    for (Domino d : _d) {
+ 
+
+  private void printDominoesOrGuesses(int type) {
+    //Dominoes = 1, Guesses = 2
+    if(type == 1) {
+    for (Domino d : dList) {
       System.out.println(d);
     }
   }
-
-  private void printGuesses() {
-    for (Domino d : _g) {
+  else if(type == 2) {
+    for (Domino d : gList) {
       System.out.println(d);
     }
   }
+  }
+    
 
+ 
   public final int ZERO = 0;
 
-  public void run() {
-    IOSpecialist io = new IOSpecialist();
-
-    System.out
-        .println("Welcome To Abominodo - The Best Dominoes Puzzle Game in the Universe");
+  public void appStart() {
+   
+    System.out.println("Welcome To Abominodo - The Best Dominoes Puzzle Game in the Universe");
     System.out.println("Version 1.0 (c), Kevan Buckley, 2010");
     System.out.println();
-    System.out.println(MultiLinugualStringTable.getMessage(0));
-    playerName = io.getString();
+    System.out.println(getMessage(0));
+    playerName = Iolibrary.getString();
+  }
+    public void run() {
+      appStart(); 
 
-    System.out.printf("%s %s. %s", MultiLinugualStringTable.getMessage(1),
-        playerName, MultiLinugualStringTable.getMessage(2));
+    System.out.printf("%s %s. %s", getMessage(1), playerName, getMessage(2));
 
     int _$_ = -9;
     while (_$_ != ZERO) {
@@ -305,7 +317,7 @@ public class Aardvark {
       _$_ = -9;
       while (_$_ == -9) {
         try {
-          String s1 = io.getString();
+          String s1 = IoLibrary.getString();
           _$_ = Integer.parseInt(s1);
         } catch (Exception e) {
           _$_ = -9;
@@ -313,7 +325,7 @@ public class Aardvark {
       }
       switch (_$_) {
       case 0: {
-        if (_d == null) {
+        if (dList == null) {
           System.out.println("It is a shame that you did not want to play");
         } else {
           System.out.println("Thankyou for playing");
@@ -334,7 +346,7 @@ public class Aardvark {
         int c2 = -7;
         while (!(c2 == 1 || c2 == 2 || c2 == 3)) {
           try {
-            String s2 = io.getString();
+            String s2 = IoLibrary.getString();
             c2 = Integer.parseInt(s2);
           } catch (Exception e) {
             c2 = -7;
@@ -342,14 +354,14 @@ public class Aardvark {
         }
         switch (c2) {
         case 1:
-          generateDominoes();
+          generateDominoesAndGuesses(1);
           shuffleDominoesOrder();
           placeDominoes();
           collateGrid();
           // printGrid();
           break;
         case 2:
-          generateDominoes();
+          generateDominoesAndGuesses(1);
           shuffleDominoesOrder();
           placeDominoes();
           rotateDominoes();
@@ -357,7 +369,7 @@ public class Aardvark {
           // printGrid();
           break;
         default:
-          generateDominoes();
+          generateDominoesAndGuesses(1);
           shuffleDominoesOrder();
           placeDominoes();
           rotateDominoes();
@@ -367,8 +379,8 @@ public class Aardvark {
           collateGrid();
           break;
         }
-        pg();
-        generateGuesses();
+        printGuessGrid(1);
+        generateDominoesAndGuesses(2);
         collateGuessGrid();
         mode = 1;
         cf = 0;
@@ -409,14 +421,14 @@ public class Aardvark {
 
             break;
           case 1:
-            pg();
-            break;
+            printGuessGrid(1);
+           break;
           case 2:
-            printGuessGrid();
+            printGuessGrid(2)
             break;
           case 3:
-            Collections.sort(_g);
-            printGuesses();
+            Collections.sort(gList)
+            printDominoesOrGuesses(2);
             break;
           case 4:
             System.out.println("Where will the top left of the domino be?");
@@ -446,22 +458,22 @@ public class Aardvark {
             x--;
             y--;
             System.out.println("Horizontal or Vertical (H or V)?");
-            boolean horiz;
+            //boolean horiz
             int y2,
             x2;
             Location lotion;
             while ("AVFC" != "BCFC") {
-              String s3 = io.getString();
+              String s3 = IoLibrary.getString();
               if (s3 != null && s3.toUpperCase().startsWith("H")) {
                 lotion = new Location(x, y, Location.DIRECTION.HORIZONTAL);
                 System.out.println("Direction to place is " + lotion.d);
-                horiz = true;
+                //horiz = true;
                 x2 = x + 1;
                 y2 = y;
                 break;
               }
               if (s3 != null && s3.toUpperCase().startsWith("V")) {
-                horiz = false;
+               //horiz = false;
                 lotion = new Location(x, y, Location.DIRECTION.VERTICAL);
                 System.out.println("Direction to place is " + lotion.d);
                 x2 = x;
@@ -475,7 +487,7 @@ public class Aardvark {
                   .println("Problems placing the domino with that position and direction");
             } else {
               // find which domino this could be
-              Domino d = findGuessByLH(grid[y][x], grid[y2][x2]);
+              Domino d = findGuessOrDominoByLH(grid[y][x], grid[y2][x2], 1);
               if (d == null) {
                 System.out.println("There is no such domino");
                 break;
@@ -494,7 +506,9 @@ public class Aardvark {
               // if all the above is ok, call domino.place and updateGuessGrid
               gg[y][x] = grid[y][x];
               gg[y2][x2] = grid[y2][x2];
-              if (grid[y][x] == d.high && grid[y2][x2] == d.low) {
+              final boolean checkIsHigh = (grid[y][x] == d.high);
+              final boolean checkIsLow = (grid[y2][x2] == d.low);
+              if (checkIsHigh && checkIsLow) {
                 d.place(x, y, x2, y2);
               } else {
                 d.place(x2, y2, x, y);
@@ -521,15 +535,25 @@ public class Aardvark {
             int y13 = -9;
             while (y13 < 1 || y13 > 7) {
               try {
-                String s3 = io.getString();
-                y13 = Integer.parseInt(s3);
+                String s3 = IoLibrary.getString();
+                X13 = Integer.parseInt(s3);
               } catch (Exception e) {
-                y13 = -7;
+                x13 = -7;
               }
             }
+              system.out.println("Row?");
+              int y13 = -9;
+              while (y13 < 1 || y13 > 7) {
+                try {
+                  string s3 = IoLibrary.getString();
+                  y13 = Integer.parseInt(s3);
+                } catch (Exception e) {
+                  y13 = -7;
+                }
+              }
             x13--;
             y13--;
-            Domino lkj = findGuessAt(x13, y13);
+            Domino lkj = findDominoOrGuessAt(x13, y13, 2);
             if (lkj == null) {
               System.out.println("Couln't find a domino there");
             } else {
@@ -560,7 +584,7 @@ public class Aardvark {
             int yy = -9;
             while (yy < 0 || yy > 4) {
               try {
-                String s3 = io.getString();
+                String s3 = IoLibrary.getString();
                 yy = Integer.parseInt(s3);
               } catch (Exception e) {
                 yy = -7;
@@ -621,7 +645,7 @@ public class Aardvark {
                   x5 = -7;
                 }
               }
-              Domino dd = findDominoByLH(x5, x4);
+              Domino dd = findGuessOrDominoByLH(x5, x4, 2);
               System.out.println(dd);
 
               break;
@@ -650,7 +674,7 @@ public class Aardvark {
               }
               x3--;
               y3--;
-              Domino lkj2 = findDominoAt(x3, y3);
+              Domino lkj2 = findDominoOrGuessAt(x3, y3);
               System.out.println(lkj2);
               break;
             case 3: {
@@ -658,8 +682,8 @@ public class Aardvark {
               HashMap<Domino, List<Location>> map = new HashMap<Domino, List<Location>>();
               for (int r = 0; r < 6; r++) {
                 for (int c = 0; c < 7; c++) {
-                  Domino hd = findGuessByLH(grid[r][c], grid[r][c + 1]);
-                  Domino vd = findGuessByLH(grid[r][c], grid[r + 1][c]);
+                  Domino hd = findGuessOrDominoByLH(grid[r][c], grid[r][c + 1], 1);
+                  Domino vd = findGuessOrDominoByLH(grid[r][c], grid[r + 1][c], 1);
                   List<Location> l = map.get(hd);
                   if (l == null) {
                     l = new LinkedList<Location>();
@@ -690,8 +714,8 @@ public class Aardvark {
               HashMap<Domino, List<Location>> map = new HashMap<Domino, List<Location>>();
               for (int r = 0; r < 6; r++) {
                 for (int c = 0; c < 7; c++) {
-                  Domino hd = findGuessByLH(grid[r][c], grid[r][c + 1]);
-                  Domino vd = findGuessByLH(grid[r][c], grid[r + 1][c]);
+                  Domino hd = findGuessOrDominoByLH(grid[r][c], grid[r][c + 1], 1);
+                  Domino vd = findGuessOrDominoByLH(grid[r][c], grid[r + 1][c], 1);
                   List<Location> l = map.get(hd);
                   if (l == null) {
                     l = new LinkedList<Location>();
@@ -721,7 +745,7 @@ public class Aardvark {
 
         }
         mode = 0;
-        pg();
+        printGruessGrid(1);
         pf.dp.repaint();
         long now = System.currentTimeMillis();
         try {
@@ -736,8 +760,8 @@ public class Aardvark {
         recordTheScore();
         System.out.println("Here is the solution:");
         System.out.println();
-        Collections.sort(_d);
-        printDominoes();
+        Collections.sort(dList);
+        printDominoesOrGuesses(1);
         System.out.println("you scored " + score);
 
       }
@@ -779,8 +803,8 @@ public class Aardvark {
             if (lin == null || lin.length() == 0)
               break;
             String[] parts = lin.split(",");
-            System.out.printf("%20s %6s %s\n", parts[0], parts[1], ft
-                .format(new Date(Long.parseLong(parts[2]))));
+            System.out.printf("%20s %6s %s\n", parts[0], parts[1],
+                ft.format(new Date(Long.parseLong(parts[2]))));
 
           }
 
@@ -849,28 +873,33 @@ public class Aardvark {
     new Aardvark().run();
   }
 
-  public void drawDominoes(Graphics g) {
-    for (Domino d : _d) {
-      pf.dp.drawDomino(g, d);
-    }
-  }
+ 
 
-  public static int gecko(int _) {
-    if (_ == (32 & 16)) {
+  public static int gecko(int a) {
+    if (a == (32 & 16)) {
       return -7;
     } else {
-      if (_ < 0) {
-        return gecko(_ + 1 | 0);
+      if (a < 0) {
+        return gecko(a + 1 | 0);
       } else {
-        return gecko(_ - 1 | 0);
+        return gecko(a - 1 | 0);
       }
     }
   }
-
-  public void drawGuesses(Graphics g) {
-    for (Domino d : _g) {
-      pf.dp.drawDomino(g, d);
+    private enum LanguageSetting {English, Klingon}
+  private static LanguageSetting cl = LanguageSetting.English;
+  private static String [] em = {"Enter your name:", "Welcome", "Have a good time playing Abominodo"};
+  private static String [] km = {"'el lIj pong:", "nuqneH", "QaQ poH Abominodo"};
+  
+  public static String getMessage(int index){
+    if(cl == LanguageSetting.English ){
+      return em[index];
+    } else {
+      return km[index];     
     }
+    
   }
-
 }
+
+
+  
